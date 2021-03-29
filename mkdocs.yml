@@ -1,0 +1,19 @@
+site_name: ToolVersions Documentation
+site_description: The APL Tools Versions Tool
+docs_dir: docs/
+repo_name: 'RikedyP/ToolVersions'
+repo_url: 'https://github.com/rikedyp/ToolVersions'
+theme:
+  name: material
+  favicon: 'img/favicon-32.png'
+  logo: 'img/dyalog-white.svg'
+  features:
+    - navigation.instant
+plugins:
+  - search
+  - awesome-pages
+  - section-index
+markdown_extensions:
+  - admonition
+extra_css:
+  - style/main.css
