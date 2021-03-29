@@ -1,0 +1,42 @@
+name: "Draft Release"
+
+on:
+  push:
+    branches:
+      - "trunk"
+  workflow_dispatch:   # allows triggering from GitHub interface
+
+jobs:
+# Obtain major.minor.[variant-] version number
+  draft_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Triggered by which branch
+        run: echo "$GITHUB_REF"
+      - name: Checkout code
+        uses: actions/checkout@v2      
+      - name: Read major.minor
+        id: majmin
+        run: |
+          VER=$( cat MyTool.apln | grep "VERSION_STRING←'[0-9]\+.[0-9]\+..*-\?0'" | cut -c 25- | sed "s/...$//" )
+          echo ${VER}
+          echo "::set-output name=version::${VER}"
+# Create or update Draft release
+      - name: Build and test
+        run: |
+          echo "done!"
+      - name: Insert patch number
+      # Replaces e.g. VERSION_STRING ← 0.3.0       with   VERSION_STRING ← 0.3.[nruns]-[git-hash]
+      #            or VERSION_STRING ← 0.3.dev-0   with   VERSION_STRING ← 0.3.dev-[nruns]-[git-hash]
+        run: |
+          sed -i "/VERSION_STRING←'[0-9]\+.[0-9]\+..*-\?0'/s/0'/${{ github.run_number }}-${{ github.sha }}'/" MyTool.apln 
+      - name: Draft release
+        uses: "marvinpinto/action-automatic-releases@latest"        
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ steps.majmin.outputs.version }}.${{ github.run_number }}-${{ github.sha }}"
+          prerelease: false
+          draft: true
+          title: "v${{ steps.majmin.outputs.version }}.${{ github.run_number }}"
+          files: |
+            MyTool.apln
